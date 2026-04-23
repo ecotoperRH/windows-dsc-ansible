@@ -1,0 +1,14 @@
+[
+  {
+    "name": "Host Guardian Service Installer",
+    "path": "host-guardian-service/",
+    "description": "A sequential three-script PowerShell workflow that provisions a Windows Server node as an HGS cluster member across mandatory reboots: installing prerequisites and renaming the machine, initializing the HGS domain and AD forest, and configuring the HGS service with TPM attestation mode and signing/encryption certificates.",
+    "technology": "PowerShell"
+  },
+  {
+    "name": "Group Policy Baseline Importer",
+    "path": "group-policy-baseline/",
+    "description": "A PowerShell script that bulk-imports seven GPO backups representing the Microsoft Security Baseline 2019 into an Active Directory domain, covering Domain Controllers, Member Servers, Workstations, Credential Guard, Virtualization-Based Security, Defender Antivirus, and core domain policies.",
+    "technology": "PowerShell"
+  }
+]
