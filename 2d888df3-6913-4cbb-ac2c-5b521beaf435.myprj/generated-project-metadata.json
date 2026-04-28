@@ -1,0 +1,74 @@
+[
+  {
+    "name": "ActiveDirectoryBuild",
+    "path": "ActiveDirectoryBuild.ps1",
+    "description": "Configures the first domain controller in a new forest with comprehensive AD structure, security groups, OUs, DNS settings, and user accounts",
+    "technology": "PowerShell"
+  },
+  {
+    "name": "ActiveDirectoryHub",
+    "path": "ActiveDirectoryHub.ps1",
+    "description": "Configures additional domain controllers and hub infrastructure for the Active Directory forest",
+    "technology": "PowerShell"
+  },
+  {
+    "name": "MemberServer",
+    "path": "MemberServer.ps1",
+    "description": "Base configuration for standard member servers joining the domain with security settings",
+    "technology": "PowerShell"
+  },
+  {
+    "name": "MemberServerSQL",
+    "path": "MemberServerSQL.ps1",
+    "description": "SQL Server specific configuration for member servers with additional security and performance settings",
+    "technology": "PowerShell"
+  },
+  {
+    "name": "RedForestBuild",
+    "path": "RedForestBuild.ps1",
+    "description": "Specialized configuration for building a Red Forest (Enhanced Security Administrative Forest)",
+    "technology": "PowerShell"
+  },
+  {
+    "name": "S2DHypervisorDell",
+    "path": "S2DHypervisorDell.ps1",
+    "description": "Storage Spaces Direct (S2D) configuration for Dell hypervisors",
+    "technology": "PowerShell"
+  },
+  {
+    "name": "StandAloneHypervisorDell",
+    "path": "StandAloneHypervisorDell.ps1",
+    "description": "Configuration for standalone Dell hypervisors without S2D",
+    "technology": "PowerShell"
+  },
+  {
+    "name": "Host Guardian Service",
+    "path": "host-guardian-service/",
+    "description": "Three-step process to configure Host Guardian Service for Shielded VMs",
+    "technology": "PowerShell"
+  },
+  {
+    "name": "Group Policy Baseline",
+    "path": "group-policy-baseline/",
+    "description": "Collection of Group Policy Objects for security hardening and configuration",
+    "technology": "PowerShell"
+  },
+  {
+    "name": "Code Integrity",
+    "path": "code-integrity/",
+    "description": "Windows Defender Application Control policies for audit and enforcement",
+    "technology": "PowerShell"
+  },
+  {
+    "name": "One-Time Configuration",
+    "path": "one-time-config/",
+    "description": "Scripts and configurations for initial setup and special use cases",
+    "technology": "PowerShell"
+  },
+  {
+    "name": "Runbooks",
+    "path": "runbooks/",
+    "description": "Collection of automation scripts for various administrative tasks",
+    "technology": "PowerShell"
+  }
+]
