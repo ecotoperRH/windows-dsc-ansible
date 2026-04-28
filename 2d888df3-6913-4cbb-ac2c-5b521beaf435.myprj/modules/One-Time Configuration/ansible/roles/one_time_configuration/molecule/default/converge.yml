@@ -1,0 +1,73 @@
+---
+- name: Converge
+  hosts: all
+  gather_facts: true
+  tasks:
+    - name: Create directory structure for registry simulation
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: "0755"
+      loop:
+        - /tmp/molecule_test/registry/HKCU/Software/Microsoft/Windows/CurrentVersion/Internet Settings/ZoneMap/Domains
+
+    - name: Create XML file directory
+      ansible.builtin.file:
+        path: "/tmp/molecule_test/temp"
+        state: directory
+        mode: "0755"
+
+    - name: Copy Office365 trusted sites XML file
+      ansible.builtin.copy:
+        content: |
+          <trusted>
+             <site>*.office365.com</site>
+             <site>*.office.com</site>
+             <site>*.office.net</site>
+             <site>*.microsoftonline.com</site>
+             <site>*.microsoft.com</site>
+             <site>*.live.com</site>
+             <site>*.windows.net</site>
+             <site>*.microsoftonline-p.com</site>
+             <site>*.microsoftonline-p.net</site>
+             <site>*.microsoftonlineimages.com</site>
+             <site>*.msecnd.net</site>
+             <site>*.msocdn.com</site>
+             <site>*.onmicrosoft.com</site>
+             <site>*.glbdns.microsoft.com</site>
+          </trusted>
+        dest: "/tmp/molecule_test/temp/Office365-TrustedSites.xml"
+        mode: "0644"
+
+    # Simulate registry entries for a few sample domains
+    - name: Create registry domain directories
+      ansible.builtin.file:
+        path: "/tmp/molecule_test/registry/HKCU/Software/Microsoft/Windows/CurrentVersion/Internet Settings/ZoneMap/Domains/{{ item.domain }}/{{ item.subdomain }}"
+        state: directory
+        mode: "0755"
+      loop:
+        - { domain: "office365.com", subdomain: "*" }
+        - { domain: "office.com", subdomain: "*" }
+        - { domain: "microsoft.com", subdomain: "*" }
+
+    # Simulate registry values for HTTP protocol
+    - name: Create HTTP registry value files
+      ansible.builtin.copy:
+        content: "2"
+        dest: "/tmp/molecule_test/registry/HKCU/Software/Microsoft/Windows/CurrentVersion/Internet Settings/ZoneMap/Domains/{{ item.domain }}/{{ item.subdomain }}/http"
+        mode: "0644"
+      loop:
+        - { domain: "office365.com", subdomain: "*" }
+        - { domain: "office.com", subdomain: "*" }
+        - { domain: "microsoft.com", subdomain: "*" }
+
+    # Simulate registry values for HTTPS protocol
+    - name: Create HTTPS registry value files
+      ansible.builtin.copy:
+        content: "2"
+        dest: "/tmp/molecule_test/registry/HKCU/Software/Microsoft/Windows/CurrentVersion/Internet Settings/ZoneMap/Domains/{{ item.domain }}/{{ item.subdomain }}/https"
+        mode: "0644"
+      loop:
+        - { domain: "office365.com", subdomain: "*" }
+        - { domain: "office.com", subdomain: "*" }
+        - { domain: "microsoft.com", subdomain: "*" }

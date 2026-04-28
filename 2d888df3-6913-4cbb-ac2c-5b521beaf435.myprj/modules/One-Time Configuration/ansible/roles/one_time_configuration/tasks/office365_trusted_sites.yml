@@ -1,0 +1,46 @@
+---
+- name: Copy Office365 trusted sites XML file
+  ansible.windows.win_copy:
+    src: Office365-TrustedSites.xml
+    dest: "{{ ansible_env.TEMP }}\\Office365-TrustedSites.xml"
+- name: Read Office365 trusted sites XML file
+  ansible.windows.win_shell: "[xml]$xml = Get-Content \"{{ ansible_env.TEMP }}\\\\Office365-TrustedSites.xml\"\n$sites = @()\nforeach($entry in $xml.trusted) {\n\
+    \  $sites += $entry.site\n}\n$sites | ConvertTo-Json\n"
+  register: trusted_sites_result
+- name: Parse trusted sites from JSON
+  ansible.builtin.set_fact:
+    trusted_sites: "{{ trusted_sites_result.stdout | from_json }}"
+- name: Configure Office365 trusted sites in registry
+  ansible.windows.win_regedit:
+    path: "{{ office365_trusted_sites_registry_path }}\\{{ primary_domain }}\\{{ subdomain }}"
+    state: present
+  vars:
+    primary_domain: "{{ site.split('.')[1:] | join('.') }}"
+    subdomain: "{{ site.split('.')[0] }}"
+  loop: "{{ trusted_sites }}"
+  loop_control:
+    loop_var: site
+- name: Set HTTP protocol as trusted for each site
+  ansible.windows.win_regedit:
+    path: "{{ office365_trusted_sites_registry_path }}\\{{ primary_domain }}\\{{ subdomain }}"
+    name: http
+    data: "{{ office365_trusted_sites_dword_value }}"
+    type: dword
+  vars:
+    primary_domain: "{{ site.split('.')[1:] | join('.') }}"
+    subdomain: "{{ site.split('.')[0] }}"
+  loop: "{{ trusted_sites }}"
+  loop_control:
+    loop_var: site
+- name: Set HTTPS protocol as trusted for each site
+  ansible.windows.win_regedit:
+    path: "{{ office365_trusted_sites_registry_path }}\\{{ primary_domain }}\\{{ subdomain }}"
+    name: https
+    data: "{{ office365_trusted_sites_dword_value }}"
+    type: dword
+  vars:
+    primary_domain: "{{ site.split('.')[1:] | join('.') }}"
+    subdomain: "{{ site.split('.')[0] }}"
+  loop: "{{ trusted_sites }}"
+  loop_control:
+    loop_var: site

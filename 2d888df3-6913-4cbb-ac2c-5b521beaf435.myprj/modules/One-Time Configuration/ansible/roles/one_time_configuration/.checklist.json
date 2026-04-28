@@ -1,0 +1,117 @@
+{
+  "module_name": "one_time_configuration",
+  "items": [
+    {
+      "category": "credentials",
+      "source_path": "N/A",
+      "target_path": "ansible/roles/one_time_configuration/aap-configuration/controller_credential_types.yml",
+      "status": "complete",
+      "description": "AAP credential types configuration",
+      "notes": ""
+    },
+    {
+      "category": "credentials",
+      "source_path": "N/A",
+      "target_path": "ansible/roles/one_time_configuration/aap-configuration/controller_credentials.yml",
+      "status": "complete",
+      "description": "AAP credentials configuration",
+      "notes": ""
+    },
+    {
+      "category": "credentials",
+      "source_path": "N/A",
+      "target_path": "ansible/roles/one_time_configuration/tasks/validate_credentials.yml",
+      "status": "complete",
+      "description": "Credential validation tasks",
+      "notes": ""
+    },
+    {
+      "category": "files",
+      "source_path": "one-time-config/special-use-case/Office365-TrustedSites.ps1",
+      "target_path": "ansible/roles/one_time_configuration/files/Office365-TrustedSites.ps1",
+      "status": "complete",
+      "description": "PowerShell script for configuring IE trusted sites",
+      "notes": "Copied PowerShell script to files directory"
+    },
+    {
+      "category": "files",
+      "source_path": "one-time-config/special-use-case/Office365-TrustedSites.xml",
+      "target_path": "ansible/roles/one_time_configuration/files/Office365-TrustedSites.xml",
+      "status": "complete",
+      "description": "XML file containing Office 365 trusted sites",
+      "notes": "Copied XML file to files directory"
+    },
+    {
+      "category": "recipes",
+      "source_path": "N/A",
+      "target_path": "ansible/roles/one_time_configuration/tasks/main.yml",
+      "status": "complete",
+      "description": "Main task file for the role",
+      "notes": "Created main.yml task file that includes validate_credentials.yml and office365_trusted_sites.yml"
+    },
+    {
+      "category": "recipes",
+      "source_path": "one-time-config/special-use-case/Office365-TrustedSites.ps1",
+      "target_path": "ansible/roles/one_time_configuration/tasks/office365_trusted_sites.yml",
+      "status": "complete",
+      "description": "Tasks for configuring Office 365 trusted sites",
+      "notes": "Created office365_trusted_sites.yml task file to configure IE trusted sites"
+    },
+    {
+      "category": "structure",
+      "source_path": "N/A",
+      "target_path": "ansible/roles/one_time_configuration/meta/main.yml",
+      "status": "complete",
+      "description": "Role metadata",
+      "notes": "Created standard meta/main.yml"
+    },
+    {
+      "category": "structure",
+      "source_path": "N/A",
+      "target_path": "ansible/roles/one_time_configuration/defaults/main.yml",
+      "status": "complete",
+      "description": "Role default variables",
+      "notes": "Created defaults/main.yml with variables for Office365 trusted sites configuration"
+    },
+    {
+      "category": "molecule",
+      "source_path": "N/A",
+      "target_path": "ansible/roles/one_time_configuration/molecule/default/molecule.yml",
+      "status": "complete",
+      "description": "Molecule scenario configuration",
+      "notes": "Created by MoleculeAgent (deterministic scaffold)"
+    },
+    {
+      "category": "molecule",
+      "source_path": "N/A",
+      "target_path": "ansible/roles/one_time_configuration/molecule/default/converge.yml",
+      "status": "complete",
+      "description": "Molecule converge playbook",
+      "notes": "Created converge.yml that simulates the registry structure and XML file under /tmp/molecule_test/"
+    },
+    {
+      "category": "molecule",
+      "source_path": "N/A",
+      "target_path": "ansible/roles/one_time_configuration/molecule/default/verify.yml",
+      "status": "complete",
+      "description": "Molecule verification tasks",
+      "notes": "Created verify.yml that checks for XML file existence and registry structure under /tmp/molecule_test/"
+    },
+    {
+      "category": "molecule",
+      "source_path": "N/A",
+      "target_path": "ansible/roles/one_time_configuration/molecule/default/create.yml",
+      "status": "complete",
+      "description": "Molecule create playbook",
+      "notes": "Created by MoleculeAgent (deterministic scaffold)"
+    },
+    {
+      "category": "molecule",
+      "source_path": "N/A",
+      "target_path": "ansible/roles/one_time_configuration/molecule/default/destroy.yml",
+      "status": "complete",
+      "description": "Molecule destroy playbook",
+      "notes": "Created by MoleculeAgent (deterministic scaffold)"
+    }
+  ]
+}

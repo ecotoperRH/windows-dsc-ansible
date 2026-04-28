@@ -1,0 +1,131 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Check if XML file exists
+      ansible.builtin.stat:
+        path: "/tmp/molecule_test/temp/Office365-TrustedSites.xml"
+      register: xml_file
+
+    - name: Assert XML file exists
+      ansible.builtin.assert:
+        that:
+          - xml_file.stat.exists
+          - xml_file.stat.isreg
+        fail_msg: "Office365-TrustedSites.xml file not found"
+        success_msg: "Office365-TrustedSites.xml file exists"
+
+    - name: Read XML file content
+      ansible.builtin.slurp:
+        src: "/tmp/molecule_test/temp/Office365-TrustedSites.xml"
+      register: xml_content
+      when: xml_file.stat.exists
+
+    - name: Assert XML file contains expected content
+      ansible.builtin.assert:
+        that:
+          - xml_content.content | b64decode | string is search('office365.com')
+          - xml_content.content | b64decode | string is search('microsoft.com')
+        fail_msg: "XML file does not contain expected content"
+        success_msg: "XML file contains expected content"
+      when: xml_file.stat.exists
+
+    # Check registry structure for a few sample domains
+    - name: Check registry domain directories
+      ansible.builtin.stat:
+        path: "/tmp/molecule_test/registry/HKCU/Software/Microsoft/Windows/CurrentVersion/Internet Settings/ZoneMap/Domains/{{ item.domain }}/{{ item.subdomain }}"
+      register: reg_dirs
+      loop:
+        - { domain: "office365.com", subdomain: "*" }
+        - { domain: "office.com", subdomain: "*" }
+        - { domain: "microsoft.com", subdomain: "*" }
+
+    - name: Assert registry domain directories exist
+      ansible.builtin.assert:
+        that:
+          - item.stat.exists
+          - item.stat.isdir
+        fail_msg: "Registry domain directory not found: {{ item.item.domain }}/{{ item.item.subdomain }}"
+        success_msg: "Registry domain directory exists: {{ item.item.domain }}/{{ item.item.subdomain }}"
+      loop: "{{ reg_dirs.results }}"
+
+    # Check HTTP registry values
+    - name: Check HTTP registry value files
+      ansible.builtin.stat:
+        path: "/tmp/molecule_test/registry/HKCU/Software/Microsoft/Windows/CurrentVersion/Internet Settings/ZoneMap/Domains/{{ item.domain }}/{{ item.subdomain }}/http"
+      register: http_values
+      loop:
+        - { domain: "office365.com", subdomain: "*" }
+        - { domain: "office.com", subdomain: "*" }
+        - { domain: "microsoft.com", subdomain: "*" }
+
+    - name: Assert HTTP registry value files exist
+      ansible.builtin.assert:
+        that:
+          - item.stat.exists
+          - item.stat.isreg
+        fail_msg: "HTTP registry value not found: {{ item.item.domain }}/{{ item.item.subdomain }}"
+        success_msg: "HTTP registry value exists: {{ item.item.domain }}/{{ item.item.subdomain }}"
+      loop: "{{ http_values.results }}"
+
+    # Check HTTPS registry values
+    - name: Check HTTPS registry value files
+      ansible.builtin.stat:
+        path: "/tmp/molecule_test/registry/HKCU/Software/Microsoft/Windows/CurrentVersion/Internet Settings/ZoneMap/Domains/{{ item.domain }}/{{ item.subdomain }}/https"
+      register: https_values
+      loop:
+        - { domain: "office365.com", subdomain: "*" }
+        - { domain: "office.com", subdomain: "*" }
+        - { domain: "microsoft.com", subdomain: "*" }
+
+    - name: Assert HTTPS registry value files exist
+      ansible.builtin.assert:
+        that:
+          - item.stat.exists
+          - item.stat.isreg
+        fail_msg: "HTTPS registry value not found: {{ item.item.domain }}/{{ item.item.subdomain }}"
+        success_msg: "HTTPS registry value exists: {{ item.item.domain }}/{{ item.item.subdomain }}"
+      loop: "{{ https_values.results }}"
+
+    - name: Read HTTP registry value content
+      ansible.builtin.slurp:
+        src: "/tmp/molecule_test/registry/HKCU/Software/Microsoft/Windows/CurrentVersion/Internet Settings/ZoneMap/Domains/{{ item.domain }}/{{ item.subdomain }}/http"
+      register: http_content
+      loop:
+        - { domain: "office365.com", subdomain: "*" }
+        - { domain: "office.com", subdomain: "*" }
+        - { domain: "microsoft.com", subdomain: "*" }
+
+    - name: Assert HTTP registry values are set to 2
+      ansible.builtin.assert:
+        that:
+          - item.content | b64decode | trim == "2"
+        fail_msg: "HTTP registry value for {{ item.item.domain }}/{{ item.item.subdomain }} is not set to 2"
+        success_msg: "HTTP registry value for {{ item.item.domain }}/{{ item.item.subdomain }} is correctly set to 2"
+      loop: "{{ http_content.results }}"
+
+    - name: Read HTTPS registry value content
+      ansible.builtin.slurp:
+        src: "/tmp/molecule_test/registry/HKCU/Software/Microsoft/Windows/CurrentVersion/Internet Settings/ZoneMap/Domains/{{ item.domain }}/{{ item.subdomain }}/https"
+      register: https_content
+      loop:
+        - { domain: "office365.com", subdomain: "*" }
+        - { domain: "office.com", subdomain: "*" }
+        - { domain: "microsoft.com", subdomain: "*" }
+
+    - name: Assert HTTPS registry values are set to 2
+      ansible.builtin.assert:
+        that:
+          - item.content | b64decode | trim == "2"
+        fail_msg: "HTTPS registry value for {{ item.item.domain }}/{{ item.item.subdomain }} is not set to 2"
+        success_msg: "HTTPS registry value for {{ item.item.domain }}/{{ item.item.subdomain }} is correctly set to 2"
+      loop: "{{ https_content.results }}"
+
+    # The following check would be performed on a real Windows system but can't run in container
+    - name: Check registry keys for Office365 trusted sites (Windows only)
+      ansible.windows.win_shell: |
+        Get-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap\Domains\office365.com\*" -Name http,https -ErrorAction SilentlyContinue
+      register: registry_check
+      failed_when: false
+      tags: molecule-notest

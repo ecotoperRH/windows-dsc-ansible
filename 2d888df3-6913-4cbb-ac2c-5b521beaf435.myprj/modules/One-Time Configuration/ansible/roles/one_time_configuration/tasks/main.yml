@@ -1,0 +1,9 @@
+---
+- name: Validate credential variables
+  ansible.builtin.include_tasks: validate_credentials.yml
+- name: Configure Office365 trusted sites
+  ansible.builtin.include_tasks: office365_trusted_sites.yml
+  when: office365_trusted_sites_enabled | bool
+  tags:
+    - office365
+    - trusted_sites
