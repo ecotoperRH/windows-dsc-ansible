@@ -1,0 +1,11 @@
+---
+- name: Validate credential variables
+  ansible.builtin.include_tasks: validate_credentials.yml
+- name: Run preflight checks
+  ansible.builtin.include_tasks: preflight_checks.yml
+- name: Step 1 - Install HGS prerequisites and configure WinRM
+  ansible.builtin.include_tasks: step_one.yml
+- name: Step 2 - Install HGS server and create domain
+  ansible.builtin.include_tasks: step_two.yml
+- name: Step 3 - Initialize HGS server with certificates
+  ansible.builtin.include_tasks: step_three.yml

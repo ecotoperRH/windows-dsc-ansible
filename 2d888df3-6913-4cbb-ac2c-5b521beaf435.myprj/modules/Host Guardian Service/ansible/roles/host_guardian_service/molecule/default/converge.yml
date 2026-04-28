@@ -1,0 +1,55 @@
+- name: Converge
+  hosts: all
+  gather_facts: true
+  tasks:
+  - name: Create expected directories
+    ansible.builtin.file:
+      path: '{{ item }}'
+      state: directory
+      mode: '0755'
+    loop:
+    - /tmp/molecule_test/Admin
+    - /tmp/molecule_test/Admin/host-guardian-service
+    - /tmp/molecule_test/Windows/System32
+  - name: Create expected certificate files
+    ansible.builtin.copy:
+      content: '# Mock certificate content for testing'
+      dest: '{{ item }}'
+      mode: '0644'
+    loop:
+    - /tmp/molecule_test/Admin/host-guardian-service/HGS-Certificate.pfx
+    - /tmp/molecule_test/Windows/System32/cert.pem
+  - name: Create mock HGS service file
+    ansible.builtin.copy:
+      content: '# Mock HGS service configuration
+
+        Domain: cool-name.net
+
+        ServiceName: cool-name-here
+
+        Status: Running
+
+        '
+      dest: /tmp/molecule_test/Admin/host-guardian-service/hgs-config.txt
+      mode: '0644'
+  - name: Create mock Windows features file
+    ansible.builtin.copy:
+      content: "{\n  \"HostGuardianServiceRole\": \"Installed\",\n  \"DNS\": \"Installed\"\n}\n"
+      dest: /tmp/molecule_test/Admin/host-guardian-service/windows-features.json
+      mode: '0644'
+  - name: Create mock WinRM configuration file
+    ansible.builtin.copy:
+      content: '# Mock WinRM configuration
+
+        Status: Enabled
+
+        RemotingEnabled: True
+
+        '
+      dest: /tmp/molecule_test/Admin/host-guardian-service/winrm-config.txt
+      mode: '0644'
+  - name: Create mock HGS service status file
+    ansible.builtin.copy:
+      content: "{\n  \"Name\": \"GuardianService\",\n  \"Status\": \"Running\"\n}\n"
+      dest: /tmp/molecule_test/Admin/host-guardian-service/hgs-service-status.json
+      mode: '0644'

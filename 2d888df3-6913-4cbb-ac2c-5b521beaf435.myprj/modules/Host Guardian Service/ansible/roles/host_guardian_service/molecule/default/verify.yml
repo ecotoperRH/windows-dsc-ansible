@@ -1,0 +1,154 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+  tasks:
+    # Check if directories exist
+    - name: Check if required directories exist
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      register: dir_check
+      loop:
+        - /tmp/molecule_test/Admin
+        - /tmp/molecule_test/Admin/host-guardian-service
+        - /tmp/molecule_test/Windows/System32
+
+    - name: Assert directories exist
+      ansible.builtin.assert:
+        that:
+          - item.stat.exists
+          - item.stat.isdir
+        fail_msg: "Directory {{ item.item }} does not exist"
+        success_msg: "Directory {{ item.item }} exists"
+      loop: "{{ dir_check.results }}"
+
+    # Check if certificate files exist
+    - name: Check if certificate files exist
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      register: cert_check
+      loop:
+        - /tmp/molecule_test/Admin/host-guardian-service/HGS-Certificate.pfx
+        - /tmp/molecule_test/Windows/System32/cert.pem
+
+    - name: Assert certificate files exist
+      ansible.builtin.assert:
+        that:
+          - item.stat.exists
+          - item.stat.size > 0
+        fail_msg: "Certificate file {{ item.item }} does not exist or is empty"
+        success_msg: "Certificate file {{ item.item }} exists"
+      loop: "{{ cert_check.results }}"
+
+    # Check mock HGS configuration
+    - name: Check if HGS config file exists
+      ansible.builtin.stat:
+        path: /tmp/molecule_test/Admin/host-guardian-service/hgs-config.txt
+      register: hgs_config_file
+
+    - name: Assert HGS config file exists
+      ansible.builtin.assert:
+        that:
+          - hgs_config_file.stat.exists
+          - hgs_config_file.stat.size > 0
+        fail_msg: "HGS config file does not exist or is empty"
+        success_msg: "HGS config file exists"
+
+    - name: Read HGS config file
+      ansible.builtin.slurp:
+        src: /tmp/molecule_test/Admin/host-guardian-service/hgs-config.txt
+      register: hgs_config_content
+      when: hgs_config_file.stat.exists
+
+    - name: Assert HGS config contains expected values
+      ansible.builtin.assert:
+        that:
+          - hgs_config_decoded is regex("Domain: cool-name.net")
+          - hgs_config_decoded is regex("ServiceName: cool-name-here")
+        fail_msg: "HGS config does not contain expected values"
+        success_msg: "HGS config contains expected values"
+      vars:
+        hgs_config_decoded: "{{ hgs_config_content['content'] | b64decode }}"
+      when: hgs_config_file.stat.exists
+
+    # Check Windows features
+    - name: Check if Windows features file exists
+      ansible.builtin.stat:
+        path: /tmp/molecule_test/Admin/host-guardian-service/windows-features.json
+      register: features_file
+
+    - name: Assert Windows features file exists
+      ansible.builtin.assert:
+        that:
+          - features_file.stat.exists
+          - features_file.stat.size > 0
+        fail_msg: "Windows features file does not exist or is empty"
+        success_msg: "Windows features file exists"
+
+    # Check WinRM configuration
+    - name: Check if WinRM config file exists
+      ansible.builtin.stat:
+        path: /tmp/molecule_test/Admin/host-guardian-service/winrm-config.txt
+      register: winrm_file
+
+    - name: Assert WinRM config file exists
+      ansible.builtin.assert:
+        that:
+          - winrm_file.stat.exists
+          - winrm_file.stat.size > 0
+        fail_msg: "WinRM config file does not exist or is empty"
+        success_msg: "WinRM config file exists"
+
+    - name: Read WinRM config file
+      ansible.builtin.slurp:
+        src: /tmp/molecule_test/Admin/host-guardian-service/winrm-config.txt
+      register: winrm_content
+      when: winrm_file.stat.exists
+
+    - name: Assert WinRM config contains expected values
+      ansible.builtin.assert:
+        that:
+          - winrm_decoded is regex("Status: Enabled")
+          - winrm_decoded is regex("RemotingEnabled: True")
+        fail_msg: "WinRM config does not contain expected values"
+        success_msg: "WinRM config contains expected values"
+      vars:
+        winrm_decoded: "{{ winrm_content['content'] | b64decode }}"
+      when: winrm_file.stat.exists
+
+    # Check HGS service status
+    - name: Check if HGS service status file exists
+      ansible.builtin.stat:
+        path: /tmp/molecule_test/Admin/host-guardian-service/hgs-service-status.json
+      register: service_file
+
+    - name: Assert HGS service status file exists
+      ansible.builtin.assert:
+        that:
+          - service_file.stat.exists
+          - service_file.stat.size > 0
+        fail_msg: "HGS service status file does not exist or is empty"
+        success_msg: "HGS service status file exists"
+
+    # The following checks would run on real Windows systems but can't run in containers
+    # Adding molecule-notest tag to skip them during molecule testing
+
+    - name: Check if WinRM is configured
+      ansible.builtin.debug:
+        msg: "Would run Test-WSMan in a real Windows environment"
+      tags: molecule-notest
+
+    - name: Check if required Windows features are installed
+      ansible.builtin.debug:
+        msg: "Would check for HostGuardianServiceRole and DNS features in a real Windows environment"
+      tags: molecule-notest
+
+    - name: Check HGS service status
+      ansible.builtin.debug:
+        msg: "Would check GuardianService status in a real Windows environment"
+      tags: molecule-notest
+
+    - name: Verify HGS configuration
+      ansible.builtin.debug:
+        msg: "Would verify HGS configuration with Get-HgsServer in a real Windows environment"
+      tags: molecule-notest

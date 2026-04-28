@@ -1,0 +1,29 @@
+---
+- name: Check if WinRM is configured
+  ansible.windows.win_shell: Test-WSMan
+  register: winrm_check
+  failed_when: false
+  changed_when: false
+- name: Check if required Windows features are installed
+  ansible.windows.win_shell: Get-WindowsFeature HostGuardianServiceRole, DNS | Select-Object -Property Name, InstallState | ConvertTo-Json
+  register: features_check
+  failed_when: false
+  changed_when: false
+- name: Check HGS service status
+  ansible.windows.win_shell: Get-Service GuardianService -ErrorAction SilentlyContinue | Select-Object -Property Name, Status | ConvertTo-Json
+  register: hgs_service_check
+  failed_when: false
+  changed_when: false
+- name: Verify HGS configuration
+  ansible.windows.win_shell: "Import-Module HgsServer -ErrorAction SilentlyContinue\nif (Get-Command Get-HgsServer -ErrorAction SilentlyContinue) {\n  Get-HgsServer
+    | ConvertTo-Json\n} else {\n  Write-Output \"HgsServer module not available or not configured\"\n}\n"
+  register: hgs_config_check
+  failed_when: false
+  changed_when: false
+- name: Display preflight check results
+  ansible.builtin.debug:
+    msg:
+      - "WinRM Status: {{ winrm_check.rc == 0 }}"
+      - "Required Features Status: {{ features_check.stdout | default('Not installed') }}"
+      - "HGS Service Status: {{ hgs_service_check.stdout | default('Not installed') }}"
+      - "HGS Configuration: {{ hgs_config_check.stdout | default('Not configured') }}"

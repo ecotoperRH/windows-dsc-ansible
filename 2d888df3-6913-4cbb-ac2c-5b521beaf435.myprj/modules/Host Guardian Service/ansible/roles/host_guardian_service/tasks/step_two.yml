@@ -1,0 +1,23 @@
+---
+- name: Ensure HgsServer module is available
+  ansible.windows.win_shell: 'if (-not (Get-Module -ListAvailable -Name HgsServer)) { Write-Error "HgsServer module is not available. Please ensure the Host Guardian
+    Service role is installed." exit 1 } Import-Module HgsServer Write-Output "HgsServer module imported successfully" '
+  register: hgsserver_module
+  changed_when: false
+- name: Check if HGS domain already exists
+  ansible.windows.win_shell: "Import-Module HgsServer\n$domain = Get-ADDomain -ErrorAction SilentlyContinue\nif ($domain -and $domain.DNSRoot -eq \"{{ hgs_domain_name
+    }}\") {\n  Write-Output \"HGS domain {{ hgs_domain_name }} already exists\"\n  exit 0\n} else {\n  Write-Output \"HGS domain does not exist or has different name\"\
+    \n  exit 1\n}\n"
+  register: hgs_domain_check
+  failed_when: false
+  changed_when: false
+- name: Install HGS server and create domain
+  ansible.windows.win_shell: 'Import-Module HgsServer
+
+    Install-HGSServer -HgsDomainName "{{ hgs_domain_name }}" -SafeModeAdministratorPassword (ConvertTo-SecureString -String "{{ dsrm_password }}" -AsPlainText -Force)
+    -Restart
+
+    '
+  register: hgs_install
+  no_log: true
+  when: hgs_domain_check.rc != 0

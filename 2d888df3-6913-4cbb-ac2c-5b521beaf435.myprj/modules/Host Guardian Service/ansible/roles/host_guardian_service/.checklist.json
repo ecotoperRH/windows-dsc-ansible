@@ -1,0 +1,149 @@
+{
+  "module_name": "host_guardian_service",
+  "items": [
+    {
+      "category": "credentials",
+      "source_path": "N/A",
+      "target_path": "ansible/roles/host_guardian_service/aap-configuration/controller_credential_types.yml",
+      "status": "complete",
+      "description": "AAP credential types configuration",
+      "notes": ""
+    },
+    {
+      "category": "credentials",
+      "source_path": "N/A",
+      "target_path": "ansible/roles/host_guardian_service/aap-configuration/controller_credentials.yml",
+      "status": "complete",
+      "description": "AAP credentials configuration",
+      "notes": ""
+    },
+    {
+      "category": "credentials",
+      "source_path": "N/A",
+      "target_path": "ansible/roles/host_guardian_service/tasks/validate_credentials.yml",
+      "status": "complete",
+      "description": "Credential validation tasks",
+      "notes": ""
+    },
+    {
+      "category": "structure",
+      "source_path": "N/A",
+      "target_path": "ansible/roles/host_guardian_service/meta/main.yml",
+      "status": "complete",
+      "description": "Role metadata",
+      "notes": "Created standard meta/main.yml"
+    },
+    {
+      "category": "structure",
+      "source_path": "N/A",
+      "target_path": "ansible/roles/host_guardian_service/defaults/main.yml",
+      "status": "complete",
+      "description": "Default variables",
+      "notes": "Created defaults/main.yml with configuration variables"
+    },
+    {
+      "category": "structure",
+      "source_path": "N/A",
+      "target_path": "ansible/roles/host_guardian_service/handlers/main.yml",
+      "status": "complete",
+      "description": "Role handlers",
+      "notes": "Created handlers/main.yml with reboot handler"
+    },
+    {
+      "category": "structure",
+      "source_path": "N/A",
+      "target_path": "ansible/roles/host_guardian_service/tasks/main.yml",
+      "status": "complete",
+      "description": "Main tasks file",
+      "notes": "Created main tasks file with proper task inclusion order"
+    },
+    {
+      "category": "recipes",
+      "source_path": "host-guardian-service/Install-HGS-StepOne.ps1",
+      "target_path": "ansible/roles/host_guardian_service/tasks/step_one.yml",
+      "status": "complete",
+      "description": "Step 1: WinRM config, certificate installation, Windows features, computer rename",
+      "notes": "Converted PowerShell script to Ansible tasks for step one"
+    },
+    {
+      "category": "recipes",
+      "source_path": "host-guardian-service/Install-HGS-StepTwo.ps1",
+      "target_path": "ansible/roles/host_guardian_service/tasks/step_two.yml",
+      "status": "complete",
+      "description": "Step 2: HGS domain creation",
+      "notes": "Converted PowerShell script to Ansible tasks for step two"
+    },
+    {
+      "category": "recipes",
+      "source_path": "host-guardian-service/Install-HGS-StepThree.ps1",
+      "target_path": "ansible/roles/host_guardian_service/tasks/step_three.yml",
+      "status": "complete",
+      "description": "Step 3: HGS server initialization with certificates",
+      "notes": "Converted PowerShell script to Ansible tasks for step three"
+    },
+    {
+      "category": "files",
+      "source_path": "host-guardian-service/Root.pem",
+      "target_path": "ansible/roles/host_guardian_service/files/Root.pem",
+      "status": "complete",
+      "description": "Root certificate for proxy access",
+      "notes": "Created placeholder for Root.pem certificate file"
+    },
+    {
+      "category": "files",
+      "source_path": "host-guardian-service/HGS-Certificate.pfx",
+      "target_path": "ansible/roles/host_guardian_service/files/HGS-Certificate.pfx",
+      "status": "complete",
+      "description": "HGS certificate for server initialization",
+      "notes": "Created placeholder for HGS-Certificate.pfx certificate file"
+    },
+    {
+      "category": "molecule",
+      "source_path": "N/A",
+      "target_path": "ansible/roles/host_guardian_service/molecule/default/molecule.yml",
+      "status": "complete",
+      "description": "Molecule scenario configuration",
+      "notes": "Created by MoleculeAgent (deterministic scaffold)"
+    },
+    {
+      "category": "molecule",
+      "source_path": "N/A",
+      "target_path": "ansible/roles/host_guardian_service/molecule/default/converge.yml",
+      "status": "complete",
+      "description": "Molecule converge playbook",
+      "notes": "Created converge.yml that sets up the expected filesystem structure under /tmp/molecule_test/ for testing the Host Guardian Service role"
+    },
+    {
+      "category": "molecule",
+      "source_path": "N/A",
+      "target_path": "ansible/roles/host_guardian_service/molecule/default/verify.yml",
+      "status": "complete",
+      "description": "Molecule verification tasks",
+      "notes": "Created verify.yml that checks for the expected files and configurations created by the Host Guardian Service role"
+    },
+    {
+      "category": "molecule",
+      "source_path": "N/A",
+      "target_path": "ansible/roles/host_guardian_service/molecule/default/create.yml",
+      "status": "complete",
+      "description": "Molecule create playbook",
+      "notes": "Created by MoleculeAgent (deterministic scaffold)"
+    },
+    {
+      "category": "molecule",
+      "source_path": "N/A",
+      "target_path": "ansible/roles/host_guardian_service/molecule/default/destroy.yml",
+      "status": "complete",
+      "description": "Molecule destroy playbook",
+      "notes": "Created by MoleculeAgent (deterministic scaffold)"
+    },
+    {
+      "category": "structure",
+      "source_path": "N/A",
+      "target_path": "ansible/roles/host_guardian_service/tasks/preflight_checks.yml",
+      "status": "complete",
+      "description": "Pre-flight checks for HGS installation",
+      "notes": "Created preflight checks for HGS installation"
+    }
+  ]
+}

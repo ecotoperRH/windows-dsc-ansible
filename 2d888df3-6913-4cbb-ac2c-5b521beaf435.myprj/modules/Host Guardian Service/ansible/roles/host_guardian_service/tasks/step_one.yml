@@ -1,0 +1,51 @@
+---
+- name: Enable WinRM quickconfig
+  ansible.windows.win_shell: winrm quickconfig -force
+  register: winrm_result
+  changed_when: winrm_result.rc == 0
+  failed_when: winrm_result.rc != 0 and "already exists" not in winrm_result.stderr
+- name: Enable PowerShell remoting
+  ansible.windows.win_shell: enable-psremoting -force
+  register: psremoting_result
+  changed_when: psremoting_result.rc == 0
+  failed_when: psremoting_result.rc != 0 and "already exists" not in psremoting_result.stderr
+- name: Create directory for certificates if it doesn't exist
+  ansible.windows.win_file:
+    path: "{{ hgs_log_directory }}\\host-guardian-service"
+    state: directory
+- name: Copy root certificate to target server
+  ansible.windows.win_copy:
+    src: "{{ root_certificate_path }}"
+    dest: "{{ root_certificate_dest_path }}"
+    mode: "0644"
+  notify: Install root certificate for proxy access
+- name: Install Host Guardian Service role and management tools
+  ansible.windows.win_feature:
+    name: "{{ hgs_windows_features }}"
+    include_management_tools: true
+    state: present
+  register: feature_installation
+- name: Prompt for new computer name
+  ansible.builtin.pause:
+    prompt: Please enter this machine's new name
+  register: computer_name_prompt
+  when: ansible_env.ANSIBLE_PLAYBOOK_INTERACTIVE | default(false) | bool
+- name: Set computer name variable
+  ansible.builtin.set_fact:
+    new_computer_name: "{{ computer_name_prompt.user_input | default(inventory_hostname_short) }}"
+  when: ansible_env.ANSIBLE_PLAYBOOK_INTERACTIVE | default(false) | bool
+- name: Set computer name (non-interactive)
+  ansible.builtin.set_fact:
+    new_computer_name: "{{ inventory_hostname_short }}"
+  when: not ansible_env.ANSIBLE_PLAYBOOK_INTERACTIVE | default(false) | bool
+- name: Rename computer
+  ansible.windows.win_hostname:
+    name: "{{ new_computer_name }}"
+  register: hostname_change
+- name: Restart computer if features were installed or hostname changed
+  ansible.windows.win_reboot:
+    msg: Restarting after HGS feature installation or hostname change
+    pre_reboot_delay: 5
+    post_reboot_delay: 30
+    reboot_timeout: 600
+  when: feature_installation.reboot_required or hostname_change.reboot_required

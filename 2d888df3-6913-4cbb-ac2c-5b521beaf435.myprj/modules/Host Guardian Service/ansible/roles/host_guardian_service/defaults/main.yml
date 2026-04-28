@@ -1,0 +1,11 @@
+---
+hgs_domain_name: cool-name.net
+hgs_service_name: cool-name-here
+hgs_log_directory: C:\Admin
+hgs_certificate_dest_path: C:\Admin\host-guardian-service\HGS-Certificate.pfx
+root_certificate_dest_path: C:\Windows\System32\cert.pem
+hgs_use_http: true
+hgs_trust_tpm: true
+hgs_windows_features:
+  - HostGuardianServiceRole
+  - DNS

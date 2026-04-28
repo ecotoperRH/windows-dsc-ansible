@@ -1,0 +1,46 @@
+---
+- name: Copy HGS certificate to target server
+  ansible.windows.win_copy:
+    src: "{{ certificate_path }}"
+    dest: "{{ hgs_certificate_dest_path }}"
+    mode: "0644"
+  register: cert_copy
+- name: Ensure HgsServer module is available
+  ansible.windows.win_shell: 'if (-not (Get-Module -ListAvailable -Name HgsServer)) { Write-Error "HgsServer module is not available. Please ensure the Host Guardian
+    Service role is installed." exit 1 } Import-Module HgsServer Write-Output "HgsServer module imported successfully" '
+  register: hgsserver_module
+  changed_when: false
+- name: Check if HGS server is already initialized
+  ansible.windows.win_shell: "Import-Module HgsServer\ntry {\n  $hgsServer = Get-HgsServer -ErrorAction Stop\n  if ($hgsServer -and $hgsServer.ServiceName -eq \"\
+    {{ hgs_service_name }}\") {\n    Write-Output \"HGS server is already initialized with service name {{ hgs_service_name }}\"\n    exit 0\n  } else {\n    Write-Output
+    \"HGS server is not initialized or has different service name\"\n    exit 1\n  }\n} catch {\n  Write-Output \"HGS server is not initialized\"\n  exit 1\n}\n"
+  register: hgs_init_check
+  failed_when: false
+  changed_when: false
+- name: Initialize HGS server with certificates
+  ansible.windows.win_shell: 'Import-Module HgsServer
+
+
+    # Convert password to secure string
+
+    $PFXPassword = ConvertTo-SecureString -String "{{ certificate_password }}" -AsPlainText -Force
+
+
+    # Initialize HGS server
+
+    Initialize-HgsServer -LogDirectory "{{ hgs_log_directory }}" -HgsServiceName "{{ hgs_service_name }}" {% if hgs_use_http %}-Http{% endif %} {% if hgs_trust_tpm
+    %}-TrustTpm{% endif %} -SigningCertificatePath "{{ hgs_certificate_dest_path }}" -SigningCertificatePassword $PFXPassword -EncryptionCertificatePath "{{ hgs_certificate_dest_path
+    }}" -EncryptionCertificatePassword $PFXPassword
+
+    '
+  register: hgs_init
+  no_log: true
+  when: hgs_init_check.rc != 0
+- name: Run HGS diagnostics
+  ansible.windows.win_shell: "Import-Module HgsServer Get-HGSTrace -RunDiagnostics "
+  register: hgs_diagnostics
+  changed_when: false
+- name: Display HGS diagnostics results
+  ansible.builtin.debug:
+    var: hgs_diagnostics.stdout_lines
+  when: hgs_diagnostics.stdout_lines is defined
