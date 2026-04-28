@@ -1,0 +1,12 @@
+---
+domain_name: "{{ domain_name | default('example.com') }}"
+admin_path: "{{ admin_path | default('C:\\Admin') }}"
+api_folder_path: "{{ api_folder_path | default('C:\\APIRegistration') }}"
+ad_features:
+  - AD-Domain-Services
+  - DNS
+  - RSAT-AD-PowerShell
+  - RSAT-ADDS
+  - RSAT-DNS-Server
+  - BitLocker
+  - RSAT-Feature-Tools-BitLocker-BdeAducExt

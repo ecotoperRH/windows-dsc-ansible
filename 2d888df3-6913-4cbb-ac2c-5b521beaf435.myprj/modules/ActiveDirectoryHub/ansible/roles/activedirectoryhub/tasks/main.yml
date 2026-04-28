@@ -1,0 +1,19 @@
+---
+- name: Validate credential variables
+  ansible.builtin.include_tasks: validate_credentials.yml
+- name: Configure base OS settings
+  ansible.builtin.include_tasks: base_os_settings.yml
+  tags:
+    - base_os
+- name: Install Active Directory features
+  ansible.builtin.include_tasks: install_features.yml
+  tags:
+    - install_features
+- name: Configure domain controller
+  ansible.builtin.include_tasks: domain_controller.yml
+  tags:
+    - domain_controller
+- name: Configure service monitoring
+  ansible.builtin.include_tasks: service_monitoring.yml
+  tags:
+    - service_monitoring

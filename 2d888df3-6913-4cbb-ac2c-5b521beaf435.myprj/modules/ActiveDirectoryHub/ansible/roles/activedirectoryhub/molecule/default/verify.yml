@@ -1,0 +1,120 @@
+- name: Verify
+  hosts: all
+  gather_facts: false
+  tasks:
+  - name: Check if Admin folder exists
+    ansible.builtin.stat:
+      path: /tmp/molecule_test/Admin
+    register: admin_folder
+  - name: Assert Admin folder exists
+    ansible.builtin.assert:
+      that:
+      - admin_folder.stat.exists
+      - admin_folder.stat.isdir
+      fail_msg: Admin folder does not exist
+      success_msg: Admin folder exists
+  - name: Check if Windows features are installed
+    ansible.builtin.stat:
+      path: /tmp/molecule_test/Windows/System32/{{ item }}.dll
+    register: feature_files
+    loop:
+    - AD-Domain-Services
+    - DNS
+    - RSAT-AD-PowerShell
+    - RSAT-ADDS
+    - RSAT-DNS-Server
+    - BitLocker
+    - RSAT-Feature-Tools-BitLocker-BdeAducExt
+  - name: Assert Windows features are installed
+    ansible.builtin.assert:
+      that:
+      - item.stat.exists
+      fail_msg: Feature file {{ item.item }} does not exist
+      success_msg: Feature file {{ item.item }} exists
+    loop: '{{ feature_files.results }}'
+  - name: Check if NTDS service file exists
+    ansible.builtin.stat:
+      path: /tmp/molecule_test/Windows/System32/ntds.service
+    register: ntds_service
+  - name: Assert NTDS service file exists
+    ansible.builtin.assert:
+      that:
+      - ntds_service.stat.exists
+      fail_msg: NTDS service file does not exist
+      success_msg: NTDS service file exists
+  - name: Check if domain controller configuration exists
+    ansible.builtin.stat:
+      path: /tmp/molecule_test/Windows/NTDS/dcconfig.ini
+    register: dc_config
+  - name: Assert domain controller configuration exists
+    ansible.builtin.assert:
+      that:
+      - dc_config.stat.exists
+      fail_msg: Domain controller configuration does not exist
+      success_msg: Domain controller configuration exists
+  - name: Check if UAC configuration exists
+    ansible.builtin.stat:
+      path: /tmp/molecule_test/Windows/System32/uac_settings.ini
+    register: uac_config
+  - name: Assert UAC configuration exists
+    ansible.builtin.assert:
+      that:
+      - uac_config.stat.exists
+      fail_msg: UAC configuration does not exist
+      success_msg: UAC configuration exists
+  - name: Get UAC configuration content
+    ansible.builtin.slurp:
+      path: /tmp/molecule_test/Windows/System32/uac_settings.ini
+    register: uac_content
+    when: uac_config.stat.exists
+  - name: Assert UAC is enabled
+    ansible.builtin.assert:
+      that:
+      - '''EnableLUA=1'' in (uac_content.content | b64decode)'
+      fail_msg: UAC is not enabled
+      success_msg: UAC is enabled
+    when: uac_config.stat.exists
+  - name: Check if timezone configuration exists
+    ansible.builtin.stat:
+      path: /tmp/molecule_test/Windows/System32/timezone_settings.ini
+    register: timezone_config
+  - name: Assert timezone configuration exists
+    ansible.builtin.assert:
+      that:
+      - timezone_config.stat.exists
+      fail_msg: Timezone configuration does not exist
+      success_msg: Timezone configuration exists
+  - name: Get timezone configuration content
+    ansible.builtin.slurp:
+      path: /tmp/molecule_test/Windows/System32/timezone_settings.ini
+    register: timezone_content
+    when: timezone_config.stat.exists
+  - name: Assert timezone is set to Pacific Standard Time
+    ansible.builtin.assert:
+      that:
+      - '''TimeZone=Pacific Standard Time'' in (timezone_content.content | b64decode)'
+      fail_msg: Timezone is not set to Pacific Standard Time
+      success_msg: Timezone is set to Pacific Standard Time
+    when: timezone_config.stat.exists
+  - name: Check if PowerShell execution policy exists
+    ansible.builtin.stat:
+      path: /tmp/molecule_test/Windows/System32/powershell_policy.ini
+    register: powershell_policy
+  - name: Assert PowerShell execution policy exists
+    ansible.builtin.assert:
+      that:
+      - powershell_policy.stat.exists
+      fail_msg: PowerShell execution policy does not exist
+      success_msg: PowerShell execution policy exists
+  - name: Get PowerShell execution policy content
+    ansible.builtin.slurp:
+      path: /tmp/molecule_test/Windows/System32/powershell_policy.ini
+    register: powershell_content
+    when: powershell_policy.stat.exists
+  - name: Assert PowerShell execution policy is set to RemoteSigned
+    ansible.builtin.assert:
+      that:
+      - '''ExecutionPolicy=RemoteSigned'' in (powershell_content.content | b64decode)'
+      fail_msg: PowerShell execution policy is not set to RemoteSigned
+      success_msg: PowerShell execution policy is set to RemoteSigned
+    when: powershell_policy.stat.exists

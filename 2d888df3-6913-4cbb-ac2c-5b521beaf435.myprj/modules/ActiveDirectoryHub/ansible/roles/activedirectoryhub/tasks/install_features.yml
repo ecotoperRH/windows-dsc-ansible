@@ -1,0 +1,23 @@
+---
+- name: Install Windows Features for Active Directory
+  ansible.windows.win_feature:
+    name:
+      - AD-Domain-Services
+      - DNS
+      - RSAT-AD-PowerShell
+      - RSAT-ADDS
+      - RSAT-DNS-Server
+      - BitLocker
+      - RSAT-Feature-Tools-BitLocker-BdeAducExt
+    state: present
+    include_sub_features: true
+    include_management_tools: true
+  register: feature_installation
+  tags:
+    - install_features
+- name: Reboot if required after feature installation
+  ansible.windows.win_reboot:
+  when: feature_installation.reboot_required
+  tags:
+    - install_features
+    - reboot

@@ -1,0 +1,9 @@
+---
+- name: Ensure NTDS service is running and set to automatic
+  ansible.windows.win_service:
+    name: "{{ ntds_service_name }}"
+    start_mode: "{{ ntds_start_mode }}"
+    state: "{{ ntds_state }}"
+  tags:
+    - service_monitoring
+    - ntds

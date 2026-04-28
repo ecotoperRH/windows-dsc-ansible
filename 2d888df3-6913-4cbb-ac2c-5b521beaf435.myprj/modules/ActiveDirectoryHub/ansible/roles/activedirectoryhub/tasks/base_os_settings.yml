@@ -1,0 +1,36 @@
+---
+- name: Set UAC Configuration
+  community.windows.win_security_policy:
+    section: System Access
+    key: EnableLUA
+    value: 1
+  tags:
+    - uac
+- name: Set and monitor the Timezone
+  ansible.windows.win_timezone:
+    timezone: Pacific Standard Time
+  tags:
+    - timezone
+- name: Check current PowerShell execution policy
+  ansible.windows.win_shell: Get-ExecutionPolicy -ExecutionPolicyScope LocalMachine
+  register: current_execution_policy
+  changed_when: false
+  tags:
+    - execution_policy
+- name: Set PowerShell Execution policy
+  ansible.windows.win_shell: Set-ExecutionPolicy -ExecutionPolicyScope LocalMachine -ExecutionPolicy RemoteSigned -Force
+  when: current_execution_policy.stdout | trim != 'RemoteSigned'
+  tags:
+    - execution_policy
+- name: Create the Admin Folder
+  ansible.windows.win_file:
+    path: "{{ admin_path }}"
+    state: directory
+  tags:
+    - admin_folder
+- name: Delete the API Registration Folder
+  ansible.windows.win_file:
+    path: "{{ api_folder_path }}"
+    state: absent
+  tags:
+    - api_folder

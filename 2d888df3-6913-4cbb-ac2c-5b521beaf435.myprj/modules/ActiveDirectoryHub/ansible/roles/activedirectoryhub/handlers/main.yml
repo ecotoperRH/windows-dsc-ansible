@@ -1,0 +1,9 @@
+---
+- name: Restart NTDS service
+  ansible.windows.win_service:
+    name: NTDS
+    state: restarted
+  listen: restart ntds
+- name: Reboot server
+  ansible.windows.win_reboot:
+  listen: reboot server

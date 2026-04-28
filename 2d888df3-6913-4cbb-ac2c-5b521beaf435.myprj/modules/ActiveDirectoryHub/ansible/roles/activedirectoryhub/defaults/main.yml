@@ -1,0 +1,21 @@
+---
+domain_name: example.com
+admin_path: C:\Admin
+api_folder_path: C:\APIRegistration
+ad_install_features:
+  - AD-Domain-Services
+  - DNS
+  - RSAT-AD-PowerShell
+  - RSAT-ADDS
+  - RSAT-DNS-Server
+  - BitLocker
+  - RSAT-Feature-Tools-BitLocker-BdeAducExt
+ntds_service_name: NTDS
+ntds_start_mode: auto
+ntds_state: started
+dc_database_path: ""
+dc_sysvol_path: ""
+dc_install_dns: true
+dc_read_only: false
+domain_wait_retries: 30
+domain_wait_delay: 10

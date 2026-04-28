@@ -1,0 +1,42 @@
+---
+- name: Check if server is already a domain controller
+  ansible.windows.win_shell: "Import-Module ActiveDirectory -ErrorAction SilentlyContinue\nif ((Get-WmiObject -Class Win32_ComputerSystem).DomainRole -ge 4) {\n \
+    \ Write-Output \"true\"\n} else {\n  Write-Output \"false\"\n}\n"
+  register: dc_check
+  changed_when: false
+  tags:
+    - domain_controller
+- name: Install Active Directory Domain Services
+  ansible.windows.win_feature:
+    name: AD-Domain-Services
+    state: present
+    include_management_tools: true
+  when: dc_check.stdout | trim == "false"
+  register: ad_install
+  tags:
+    - domain_controller
+- name: Promote server to domain controller
+  ansible.windows.win_domain_controller:
+    dns_domain_name: "{{ domain_name }}"
+    safe_mode_password: "{{ ad_safe_mode_password }}"
+    domain_admin_user: "{{ ad_domain_admin_user }}"
+    domain_admin_password: "{{ ad_domain_admin_password }}"
+    database_path: "{{ dc_database_path | default(omit) }}"
+    sysvol_path: "{{ dc_sysvol_path | default(omit) }}"
+    install_dns: "{{ dc_install_dns }}"
+    read_only: "{{ dc_read_only }}"
+  when: dc_check.stdout | trim == "false"
+  register: dc_promotion
+  notify: reboot server
+  tags:
+    - domain_controller
+- name: Wait for domain to be available
+  ansible.windows.win_shell: "$ErrorActionPreference = \"Stop\"\ntry {\n  Get-ADDomain -Identity \"{{ domain_name }}\"\n  Write-Output \"Domain is available\"\n \
+    \ exit 0\n} catch {\n  Write-Output \"Domain not yet available: $_\"\n  exit 1\n}\n"
+  register: domain_check
+  until: domain_check.rc == 0
+  retries: "{{ domain_wait_retries }}"
+  delay: "{{ domain_wait_delay }}"
+  when: dc_promotion is changed
+  tags:
+    - domain_controller

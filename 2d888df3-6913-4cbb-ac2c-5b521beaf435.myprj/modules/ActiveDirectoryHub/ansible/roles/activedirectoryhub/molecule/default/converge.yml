@@ -1,0 +1,99 @@
+- name: Converge
+  hosts: all
+  gather_facts: true
+  tasks:
+  - name: Create expected directories
+    ansible.builtin.file:
+      path: '{{ item }}'
+      state: directory
+      mode: '0755'
+    loop:
+    - /tmp/molecule_test/Admin
+    - /tmp/molecule_test/Windows/System32
+    - /tmp/molecule_test/Windows/NTDS
+    - /tmp/molecule_test/Windows/SYSVOL
+  - name: Create admin folder structure
+    ansible.builtin.file:
+      path: /tmp/molecule_test/{{ item }}
+      state: directory
+      mode: '0755'
+    loop:
+    - Admin
+    - Windows/NTDS
+    - Windows/SYSVOL
+  - name: Create mock feature files
+    ansible.builtin.copy:
+      content: '# Mock Windows feature {{ item }}'
+      dest: /tmp/molecule_test/Windows/System32/{{ item }}.dll
+      mode: '0644'
+    loop:
+    - AD-Domain-Services
+    - DNS
+    - RSAT-AD-PowerShell
+    - RSAT-ADDS
+    - RSAT-DNS-Server
+    - BitLocker
+    - RSAT-Feature-Tools-BitLocker-BdeAducExt
+  - name: Create mock NTDS service file
+    ansible.builtin.copy:
+      content: '[Unit]
+
+        Description=Active Directory Domain Services
+
+        After=network.target
+
+
+        [Service]
+
+        Type=forking
+
+        ExecStart=/bin/true
+
+        Restart=on-failure
+
+
+        [Install]
+
+        WantedBy=multi-user.target
+
+        '
+      dest: /tmp/molecule_test/Windows/System32/ntds.service
+      mode: '0644'
+  - name: Create mock domain controller configuration
+    ansible.builtin.copy:
+      content: '# Mock domain controller configuration
+
+        DomainName={{ domain_name }}
+
+        DatabasePath={{ dc_database_path }}
+
+        SysvolPath={{ dc_sysvol_path }}
+
+        InstallDNS={{ dc_install_dns }}
+
+        ReadOnly={{ dc_read_only }}
+
+        '
+      dest: /tmp/molecule_test/Windows/NTDS/dcconfig.ini
+      mode: '0644'
+    vars:
+      domain_name: example.com
+      dc_database_path: ''
+      dc_sysvol_path: ''
+      dc_install_dns: true
+      dc_read_only: false
+  - name: Create mock UAC configuration
+    ansible.builtin.copy:
+      content: EnableLUA=1
+      dest: /tmp/molecule_test/Windows/System32/uac_settings.ini
+      mode: '0644'
+  - name: Create mock timezone configuration
+    ansible.builtin.copy:
+      content: TimeZone=Pacific Standard Time
+      dest: /tmp/molecule_test/Windows/System32/timezone_settings.ini
+      mode: '0644'
+  - name: Create mock PowerShell execution policy
+    ansible.builtin.copy:
+      content: ExecutionPolicy=RemoteSigned
+      dest: /tmp/molecule_test/Windows/System32/powershell_policy.ini
+      mode: '0644'
